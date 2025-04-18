@@ -3,12 +3,18 @@ import User from './schemas/user.js';
 import Review from './schemas/review.js';
 import cors from 'cors';
 import { userValid } from './validators/user.js';
+import  cookieParser  from 'cookie-parser';
+
 const app = express();
-app.use(express.json());
+app.use(cookieParser());
+
+app.use(cors({
+    origin: "http://localhost:5173", // ✅ Not '*'
+    credentials: true
+  }));
 
 const PORT = 3000;
 app.use(express.json());
-app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('API is running');
@@ -146,6 +152,30 @@ app.put('/api/userDetail/:id/complete', async (req, res) => {
     }
 });
 
+const ADMIN_USER = process.env.ID;
+const ADMIN_PASS = process.env.password;
+
+app.get("/adminsignin", (req, res) => {
+    console.log(req.cookies);
+    const token = req.cookies.admin_session;
+
+    if (token === "secure_admin_token") {
+      res.status(200).json({ data: "Secret admin stuff" });
+    } else {
+      res.status(401).json({ error: "Not authorized" });
+    }
+  });
+  
+  app.post("/adminlogin", (req, res) => {
+    res.cookie("admin_session", "secure_admin_token", {
+      httpOnly: true,
+      secure: false, // set to true in production with HTTPS
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+  
+    res.status(200).json({ success: true });
+  });
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

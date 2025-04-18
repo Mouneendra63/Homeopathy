@@ -23,29 +23,29 @@ function About() {
               <div className="absolute -top-10 -left-10 w-48 h-48 bg-teal-200 rounded-full opacity-20"></div>
               <img 
                 src="https://res.cloudinary.com/dmhqod2t0/image/upload/v1744967256/PHOTO-2025-04-15-11-25-39_rw0te6.jpg"
-                alt="Dr. Sarah Johnson"
+                alt="Dr. Bandarupalli Ekaveera"
                 className="relative z-10 rounded-full shadow-xl"
               />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Dr. Sarah Johnson</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Dr. Bandarupalli Ekaveera</h2>
               <p className="text-gray-600 mb-6">
-                Dr. Johnson is a certified homeopathic practitioner with extensive experience in treating 
-                both acute and chronic conditions. Her approach combines traditional homeopathic principles 
+                Dr. Bandarupalli Ekaveera is a certified homeopathic practitioner with extensive experience in treating 
+                Homepathy. Her approach combines traditional homeopathic principles 
                 with modern medical knowledge.
               </p>
               <div className="space-y-4">
                 <div className="flex items-center">
                   <Award className="h-6 w-6 text-teal-600 mr-3" />
-                  <span>Certified by the International Homeopathy Board</span>
+                  <span>Bachelor of Homeopathic Medicine and Surgery</span>
                 </div>
                 <div className="flex items-center">
                   <Users className="h-6 w-6 text-teal-600 mr-3" />
-                  <span>Over 5,000 patients treated successfully</span>
+                  <span>Over 1,000 patients treated successfully</span>
                 </div>
                 <div className="flex items-center">
                   <Clock className="h-6 w-6 text-teal-600 mr-3" />
-                  <span>15+ years of clinical experience</span>
+                  <span>5+ years of clinical experience</span>
                 </div>
               </div>
             </div>
