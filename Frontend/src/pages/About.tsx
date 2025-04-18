@@ -1,104 +1,87 @@
-import React, { useState } from 'react';
-import { Award, Users, Clock, Star } from 'lucide-react';
-
-// ✅ Define the interface outside the component
-interface FormData {
-  name: string;
-  email: string;
-  message: string;
-  rating: number;
-}
+import React from 'react';
+import { Award, Users, Clock } from 'lucide-react';
 
 function About() {
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    message: '',
-    rating: 0,
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ): void => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleRating = (rate: number): void => {
-    setFormData({ ...formData, rating: rate });
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    console.log('Form Submitted:', formData);
-    setFormData({ name: '', email: '', message: '', rating: 0 });
-  };
-
   return (
     <div className="bg-gradient-to-b from-teal-50 to-white">
-      {/* Contact Form Section with Star Rating */}
-      <section className="py-20 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-teal-50 p-8 rounded-xl shadow-md">
-            <h2 className="text-2xl font-bold text-center text-teal-700 mb-6">Get in Touch</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-gray-700">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Message</label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
+      {/* Hero Section */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Meet Our Expert
+              <span className="text-teal-600"> Practitioner</span>
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              With over 15 years of experience in homeopathic medicine, we're dedicated to providing 
+              natural and effective healthcare solutions.
+            </p>
+          </div>
 
-              {/* Star Rating */}
-              <div>
-                <label className="block text-gray-700 mb-1">Rate Your Experience</label>
-                <div className="flex space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      onClick={() => handleRating(star)}
-                      className={`w-6 h-6 cursor-pointer ${
-                        formData.rating >= star ? 'text-yellow-500' : 'text-gray-300'
-                      }`}
-                      fill={formData.rating >= star ? 'currentColor' : 'none'}
-                    />
-                  ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="relative">
+              <div className="absolute -top-10 -left-10 w-48 h-48 bg-teal-200 rounded-full opacity-20"></div>
+              <img 
+                src="https://res.cloudinary.com/dmhqod2t0/image/upload/v1744967256/PHOTO-2025-04-15-11-25-39_rw0te6.jpg"
+                alt="Dr. Sarah Johnson"
+                className="relative z-10 rounded-full shadow-xl"
+              />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Dr. Sarah Johnson</h2>
+              <p className="text-gray-600 mb-6">
+                Dr. Johnson is a certified homeopathic practitioner with extensive experience in treating 
+                both acute and chronic conditions. Her approach combines traditional homeopathic principles 
+                with modern medical knowledge.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <Award className="h-6 w-6 text-teal-600 mr-3" />
+                  <span>Certified by the International Homeopathy Board</span>
+                </div>
+                <div className="flex items-center">
+                  <Users className="h-6 w-6 text-teal-600 mr-3" />
+                  <span>Over 5,000 patients treated successfully</span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="h-6 w-6 text-teal-600 mr-3" />
+                  <span>15+ years of clinical experience</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <button
-                type="submit"
-                className="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700"
-              >
-                Submit
-              </button>
-            </form>
+      {/* Statistics Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            {[
+              { number: "15+", label: "Years Experience" },
+              { number: "5,000+", label: "Patients Treated" },
+              { number: "98%", label: "Patient Satisfaction" }
+            ].map((stat, index) => (
+              <div key={index} className="bg-teal-50 p-8 rounded-lg">
+                <div className="text-4xl font-bold text-teal-600 mb-2">{stat.number}</div>
+                <div className="text-gray-600">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Section */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Our Mission</h2>
+            <p className="text-gray-600 text-center max-w-3xl mx-auto">
+              We are committed to providing personalized, natural healthcare solutions that address 
+              the root cause of illness rather than just treating symptoms. Our goal is to help 
+              our patients achieve optimal health through gentle, effective homeopathic treatments 
+              and lifestyle guidance.
+            </p>
           </div>
         </div>
       </section>

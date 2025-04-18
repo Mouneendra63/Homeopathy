@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Search, Edit, Eye, X, CheckCircle, Users, Clipboard, ThumbsUp, ThumbsDown, Calendar } from 'lucide-react';
+import axios from 'axios';
 
 // Type definitions
 interface MonthlyData {
@@ -25,6 +26,7 @@ interface Patient {
   phno: string;
   age: string;
   address: string;
+  sex:string;
   medicalConcern: string[];
   isCompleted: boolean;
   prescription: Prescription[];
@@ -54,6 +56,7 @@ const samplePatients: Patient[] = [
     phno: "9988776655",
     age: "35",
     address: "221B Baker Street",
+    sex:"Female",
     medicalConcern: ["Thyroid", "Migraines"],
     isCompleted: false,
     prescription: [
@@ -83,6 +86,7 @@ const samplePatients: Patient[] = [
     phno: "8877665544",
     age: "42",
     address: "42 Park Avenue",
+    sex:"Female",
     medicalConcern: ["Hypertension", "Diabetes"],
     isCompleted: true,
     prescription: [
@@ -104,6 +108,7 @@ const samplePatients: Patient[] = [
     phno: "7766554433",
     age: "28",
     address: "789 Oak Street",
+    sex:"Female",
     medicalConcern: ["Asthma", "Allergies"],
     isCompleted: false,
     prescription: [],
@@ -117,6 +122,7 @@ const samplePatients: Patient[] = [
     phno: "6655443322",
     age: "55",
     address: "567 Pine Street",
+    sex:"Male",
     medicalConcern: ["Arthritis", "High Cholesterol"],
     isCompleted: true,
     prescription: [
@@ -148,20 +154,22 @@ function Admin(): JSX.Element {
     duration: ''
   });
   const [activeTab, setActiveTab] = useState<'all' | 'completed' | 'pending'>('all');
-  useEffect(() => {
-    const fetchPatients = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/patients');
-            const data = await response.json();
-            setAllData(data);
-        } catch (error) {
-            console.error('Error fetching patients:', error);
-        }
-    };
-    fetchPatients();
-  }, []);
+  // useEffect(() => {
+  //   const fetchPatients = async () => {
+  //       try {
+  //           const response = await axios.get('http://localhost:3000//api/userDetails');
+  //           setAllData(response.data);
+  //           const data = Array.isArray(response.data) ? response.data : response.data.data;
+  //           setPatients(data);
+  //           setFilteredPatients(data);
+  //           console.log('Fetched patients:', data);
+  //       } catch (error) {
+  //           console.error('Error fetching patients:', error);
+  //       }
+  //   };
+  //   fetchPatients();
+  // }, []);
 
-  // Filter patients based on search term
   useEffect(() => {
     const filtered = patients.filter(patient => 
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -413,8 +421,7 @@ function Admin(): JSX.Element {
               <button onClick={() => setShowPatientModal(false)} className="text-gray-500 hover:text-gray-700">
                 <X className="h-6 w-6" />
               </button>
-            </div>
-            
+            </div>            
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
@@ -425,6 +432,7 @@ function Admin(): JSX.Element {
                     <p><span className="font-medium">Email:</span> {selectedPatient.email}</p>
                     <p><span className="font-medium">Phone:</span> {selectedPatient.phno}</p>
                     <p><span className="font-medium">Address:</span> {selectedPatient.address}</p>
+                    <p><span className="font-medium">Sex:</span>{selectedPatient.sex}</p>
                     <p><span className="font-medium">Registered:</span> {new Date(selectedPatient.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>

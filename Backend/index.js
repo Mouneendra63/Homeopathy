@@ -40,7 +40,7 @@ app.get('/api/userDetails/:id', async (req, res) => {
 
 app.post('/api/userDetails', async (req, res) => {
     try {
-        const { name,age, email, phno, address, medicalConcern } = req.body;
+        const { name,age, email, phno, address,sex, medicalConcern } = req.body;
 
         const medicalConcernData = medicalConcern || [];
         const valid=userValid.safeParse(req.body);
@@ -54,6 +54,7 @@ app.post('/api/userDetails', async (req, res) => {
                 email,
                 phno,
                 address,
+                sex,
                 medicalConcern: medicalConcernData
             });
     

@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
     phno: { type: String, required: true },
     age: { type: String, required: true },
     address: { type: String, required: true },
+    sex: { type: String, required: true },
     medicalConcern: { type: [String], required: true },
     prescription: {
         type: [{

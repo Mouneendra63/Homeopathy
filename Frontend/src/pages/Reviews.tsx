@@ -45,15 +45,18 @@ function Reviews() {
   useEffect(() => {
     axios.get('http://localhost:3000/api/reviews')
       .then((res) => {
-        console.log('Fetched reviews:', res.data); // 👀 log this
+        console.log('Fetched reviews:', res.data);
   
-        const reviews = Array.isArray(res.data) ? res.data : res.data.data; // 👈 safe fallback
+        const reviews = Array.isArray(res.data) ? res.data : res.data.data;
   
         setAllReviews(reviews);
   
         const filtered = reviews
           .filter((review: Review) => review.rating >= 4)
-          .sort((a: Review, b: Review) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          .sort((a: Review, b: Review) => 
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          .slice(0, 3); 
   
         setHighRatedRecentReviews(filtered);
       })

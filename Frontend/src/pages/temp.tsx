@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Search, Edit, Eye, X, CheckCircle, Users, Clipboard, ThumbsUp, ThumbsDown, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import Success from '../components/success'
 import Failure from '../components/failure';
+import AdminForm from '../pages/Form'
+import Admin from './Admin';
 
 // Type definitions
 interface MonthlyData {
@@ -28,6 +29,7 @@ interface Patient {
   phno: string;
   age: string;
   address: string;
+  sex:string;
   medicalConcern: string[];
   isCompleted: boolean;
   prescription: Prescription[];
@@ -59,12 +61,9 @@ function Temp(): JSX.Element {
   });
   const [activeTab, setActiveTab] = useState<'all' | 'completed' | 'pending'>('all');
   
-  // Add state for current year and month
-  const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
-  const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
+ 
   
   // Add state for monthly data
-  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Function to get month name
@@ -84,50 +83,10 @@ function Temp(): JSX.Element {
     }
   };
 
-  // Function to fetch monthly data for charts
-  const fetchMonthlyData = async () => {
-    try {
-      setIsLoading(true);
-      const endDate = new Date(currentYear, currentMonth, 0);
-      const startMonth = currentMonth - 2 < 0 ? 12 + (currentMonth - 2) : currentMonth - 2;
-      const startYear = currentMonth - 2 < 0 ? currentYear - 1 : currentYear;
-      const startDate = new Date(startYear, startMonth, 1);
-      
-      const response = await axios.post('http://localhost:3000/stats/monthly', {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
-      });
-      
-      const formattedData = processMonthlyData(response.data);
-      setMonthlyData(formattedData);
-      setIsLoading(false);
-    } catch (error) {
-      console.error('Error fetching monthly data:', error);
-      // Fallback to sample data in case of error
-      const sampleData = await generateSampleMonthlyData();
-      setMonthlyData(sampleData);
-      setIsLoading(false);
-    }
-  };
-
-  // Process monthly data from API response
-  const processMonthlyData = (data: any): MonthlyData[] => {
-    return data.map((item: any) => ({
-      name: getMonthName(new Date(item.month).getMonth()),
-      patients: item.patientsCount || 0,
-      goodReviews: item.goodReviewsCount || 0,
-      badReviews: item.badReviewsCount || 0
-    }));
-  };
 
 
 
-interface MonthlyData {
-    name: string;
-    patients: number;
-    goodReviews: number;
-    badReviews: number;
-  }
+
 
 const getMonthName = (monthIndex: number) =>
     new Date(0, monthIndex).toLocaleString('default', { month: 'short' });
@@ -182,33 +141,7 @@ const getMonthName = (monthIndex: number) =>
     return months;
   };
 
-  // Navigate to previous month
-  const goToPreviousMonth = () => {
-    if (currentMonth === 0) {
-      setCurrentMonth(11);
-      setCurrentYear(currentYear - 1);
-    } else {
-      setCurrentMonth(currentMonth - 1);
-    }
-  };
 
-  // Navigate to next month
-  const goToNextMonth = () => {
-    if (currentMonth === 11) {
-      setCurrentMonth(0);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
-  };
-
-  // Fetch patients on component mount
- 
-
-  // Fetch monthly data when month or year changes
-  useEffect(() => {
-    fetchMonthlyData();
-  }, [currentMonth, currentYear]);
 
   // Filter patients based on search term
   useEffect(() => {
@@ -262,7 +195,6 @@ const getMonthName = (monthIndex: number) =>
       );
       setPatients(updatedPatients.filter((patient): patient is Patient => patient !== undefined));
       setShowPatientModal(false);
-      fetchMonthlyData();
     } catch (error) {
       console.error('Error marking patient as complete:', error);
       alert('Failed to update patient status. Please try again.');
@@ -349,8 +281,6 @@ const getMonthName = (monthIndex: number) =>
   // Get total counts for stats cards
   const getTotalPatients = () => patients.length;
   const getCompletedCheckups = () => patients.filter(p => p.isCompleted).length;
-  const getTotalGoodReviews = () => monthlyData.reduce((acc, curr) => acc + curr.goodReviews, 0);
-  const getTotalBadReviews = () => monthlyData.reduce((acc, curr) => acc + curr.badReviews, 0);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -371,81 +301,6 @@ const getMonthName = (monthIndex: number) =>
           <StatsCard title="Bad Reviews" value={bad} icon={<ThumbsDown className="h-8 w-8 text-red-500" />} bgColor="bg-red-100" />
         </div>
 
-        {/* Month/Year Navigation */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Monthly Statistics</h2>
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={goToPreviousMonth} 
-              className="p-2 rounded-full hover:bg-gray-200"
-              aria-label="Previous Month"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <span className="text-lg font-medium">
-              {`${getMonthName(currentMonth)} ${currentYear}`}
-            </span>
-            <button 
-              onClick={goToNextMonth} 
-              className="p-2 rounded-full hover:bg-gray-200"
-              aria-label="Next Month"
-              disabled={
-                currentMonth === new Date().getMonth() && 
-                currentYear === new Date().getFullYear()
-              }
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-medium mb-4">Monthly Patient Growth</h2>
-            {isLoading ? (
-              <div className="h-64 flex items-center justify-center">
-                <p>Loading data...</p>
-              </div>
-            ) : (
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="patients" stroke="#4F46E5" strokeWidth={2} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-medium mb-4">Reviews Comparison</h2>
-            {isLoading ? (
-              <div className="h-64 flex items-center justify-center">
-                <p>Loading data...</p>
-              </div>
-            ) : (
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="goodReviews" fill="#4ADE80" name="Good Reviews" />
-                    <Bar dataKey="badReviews" fill="#F87171" name="Bad Reviews" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-        </div>
 
         {/* Patients Tab and Search */}
         <div className="bg-white p-6 rounded-lg shadow mb-8">
@@ -556,6 +411,7 @@ const getMonthName = (monthIndex: number) =>
             )}
           </div>
         </div>
+        <AdminForm/>
       </main>
 
       {/* Patient Details Modal */}
@@ -579,6 +435,7 @@ const getMonthName = (monthIndex: number) =>
                     <p><span className="font-medium">Email:</span> {selectedPatient.email}</p>
                     <p><span className="font-medium">Phone:</span> {selectedPatient.phno}</p>
                     <p><span className="font-medium">Address:</span> {selectedPatient.address}</p>
+                    <p><span className='font-medium' >Sex: </span>{selectedPatient.sex}</p>
                     <p><span className="font-medium">Registered:</span> {new Date(selectedPatient.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
@@ -760,9 +617,12 @@ const getMonthName = (monthIndex: number) =>
               </div>
             </form>
           </div>
+          <div>
+          </div>
         </div>
       )}
     </div>
+
   );
 }
 
