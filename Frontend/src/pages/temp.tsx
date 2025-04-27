@@ -4,7 +4,7 @@ import axios from 'axios';
 import Success from '../components/success'
 import Failure from '../components/failure';
 import AdminForm from '../pages/Form'
-import Admin from './Admin';
+import { Delete } from 'lucide-react';
 
 // Type definitions
 interface MonthlyData {
@@ -195,6 +195,7 @@ const getMonthName = (monthIndex: number) =>
       );
       setPatients(updatedPatients.filter((patient): patient is Patient => patient !== undefined));
       setShowPatientModal(false);
+      window.location.reload();
     } catch (error) {
       console.error('Error marking patient as complete:', error);
       alert('Failed to update patient status. Please try again.');
@@ -228,6 +229,7 @@ const getMonthName = (monthIndex: number) =>
       // Then fetch the updated patient
       console.log(selectedPatient._id);
       const res = await axios.get(`http://localhost:3000/api/userDetails/${selectedPatient._id}`);
+      window.location.reload();
       
       const updatedUser = res.data;
 
@@ -352,6 +354,8 @@ const getMonthName = (monthIndex: number) =>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Medical Concerns</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delete</th>
+
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -395,6 +399,23 @@ const getMonthName = (monthIndex: number) =>
                             className="text-indigo-600 hover:text-indigo-900 mr-4"
                           >
                             <Eye className="h-5 w-5" />
+                          </button>
+                        </td>
+                        <td>
+                          <button 
+                            onClick={async () => {
+                              try {
+                                await axios.delete(`http://localhost:3000/api/userDetails/${patient._id}`);
+                                setPatients(patients.filter(p => p._id !== patient._id));
+                                setFilteredPatients(filteredPatients.filter(p => p._id !== patient._id));
+                                window.location.reload();
+                              } catch (error) {
+                                console.error('Error deleting patient:', error);
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                           <Delete className='ml-8' />
                           </button>
                         </td>
                       </tr>

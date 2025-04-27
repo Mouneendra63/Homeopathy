@@ -4,6 +4,7 @@ import Review from './schemas/review.js';
 import cors from 'cors';
 import { userValid } from './validators/user.js';
 import  cookieParser  from 'cookie-parser';
+import {reviewValid} from './validators/review.js'
 
 const app = express();
 app.use(cookieParser());
@@ -44,33 +45,30 @@ app.get('/api/userDetails/:id', async (req, res) => {
     }
   });
 
-app.post('/api/userDetails', async (req, res) => {
+  app.post('/api/review', async (req, res) => {
     try {
-        const { name,age, email, phno, address,sex, medicalConcern } = req.body;
-
-        const medicalConcernData = medicalConcern || [];
-        const valid=userValid.safeParse(req.body);
-        if (!valid.success) {
-            return res.status(400).json({ error: valid.error.errors });
-        }
-        else{
-            const user = await User.create({
-                name,
-                age,
-                email,
-                phno,
-                address,
-                sex,
-                medicalConcern: medicalConcernData
-            });
-    
-            res.status(201).json({ message: 'User created successfully', user });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Something went wrong' });
+      const { name, email, rating, comment } = req.body;
+  
+      const valid = reviewValid.safeParse(req.body);
+      if (!valid.success) {
+        // If validation fails, return the errors
+        return res.status(400).json({ error: valid.error.errors });
+      }
+  
+      // Proceed with creating the review if validation is successful
+      const result = await Review.create({
+        name,
+        email,
+        rating,
+        comment,
+      });
+  
+      res.status(201).json({ success: true, message: 'Review created', data: result });
+    } catch (error) {
+      console.error('Error creating review:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
     }
-});
+  });
 
 app.put('/api/userDetails/:id', async (req, res) => {
     try {
@@ -106,14 +104,21 @@ app.put('/api/userDetails/:id', async (req, res) => {
 app.post('/api/review', async (req, res) => {
     try {
       const { name, email, rating, comment } = req.body;
+
+        const valid = reviewValid.safeParse(req.body);
+        if (!valid.success) {
+
   
-      const result = await Review.create({
-        name,
-        email,
-        rating,
-        comment,
-      });
-  
+            const result = await Review.create({
+                name,
+                email,
+                rating,
+                comment,
+            });
+        }
+        else{
+            return res.status(400).json({ error: valid.error.errors });
+        }
       res.status(201).json({ success: true, message: 'Review created', data: result });
     } catch (error) {
       console.error('Error creating review:', error);
@@ -121,17 +126,21 @@ app.post('/api/review', async (req, res) => {
     }
 });
 
-app.get('/api/reviews', async (req,res)=>
-{
+app.get('/api/reviews', async (req, res) => {
     try {
-        const result=await Review.find();
-        return res.status(200).json({success:true,message:'Reviews fetched successfully',data: result});
+      const result = await Review.find({ rating: { $gt: 3 } }) // Filter reviews with rating > 3
+        .sort({ createdAt: -1 }); // Sort by most recently added (createdAt is assumed to be present)
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Reviews fetched successfully',
+        data: result,
+      });
     } catch (error) {
-        console.error('Error creating review:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+      console.error('Error fetching reviews:', error);
+      res.status(500).json({ success: false, message: 'Server error' });
     }
-
-});
+  });
 
 app.put('/api/userDetail/:id/complete', async (req, res) => {
     try {
@@ -152,30 +161,23 @@ app.put('/api/userDetail/:id/complete', async (req, res) => {
     }
 });
 
-const ADMIN_USER = process.env.ID;
-const ADMIN_PASS = process.env.password;
-
-app.get("/adminsignin", (req, res) => {
-    console.log(req.cookies);
-    const token = req.cookies.admin_session;
-
-    if (token === "secure_admin_token") {
-      res.status(200).json({ data: "Secret admin stuff" });
-    } else {
-      res.status(401).json({ error: "Not authorized" });
+app.delete('/api/userDetails/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await User.findByIdAndDelete(id);
+  
+      if (!deleted) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      res.json({ message: 'Deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
   
-  app.post("/adminlogin", (req, res) => {
-    res.cookie("admin_session", "secure_admin_token", {
-      httpOnly: true,
-      secure: false, // set to true in production with HTTPS
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-  
-    res.status(200).json({ success: true });
-  });
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);

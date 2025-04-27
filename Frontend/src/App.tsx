@@ -138,16 +138,7 @@
 // }
 
 // export default App;
-import { useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import axios from "axios";
-import ProtectedRoute from "./pages/protectedroute";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -156,41 +147,8 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Reviews from "./pages/Reviews";
 import AdminDashboard from "./pages/temp";
-import SignIn from "./pages/signin";
-
+import Card from './components/404'
 function AppWrapper() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [isAuth, setIsAuth] = useState<boolean | null>(null);
-
-  const checkAuth = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/adminsignin", {
-        withCredentials: true,
-      });
-      const authenticated = !!res.data?.data;
-      setIsAuth(authenticated);
-
-      // If visiting /admin and already logged in, redirect to dashboard
-      if (authenticated && location.pathname === "/admin") {
-        navigate("/dashboard");
-      }
-
-      // If visiting /dashboard but not logged in, redirect to /admin
-      if (!authenticated && location.pathname === "/dashboard") {
-        navigate("/admin");
-      }
-    } catch {
-      setIsAuth(false);
-      if (location.pathname === "/dashboard") {
-        navigate("/admin");
-      }
-    }
-  };
-
-  useEffect(() => {
-    checkAuth();
-  }, [location.pathname]);
 
   return (
     <>
@@ -199,15 +157,8 @@ function AppWrapper() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/reviews" element={<Reviews />} />
-        <Route path="/admin" element={<SignIn />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute isAuth={isAuth}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/21357/ekaveera" element={<AdminDashboard />} />
+        <Route path="*" element={<Card />} />
       </Routes>
       <Footer />
     </>
