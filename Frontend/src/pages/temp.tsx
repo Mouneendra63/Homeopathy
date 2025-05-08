@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit, Eye, X, CheckCircle, Users, Clipboard, ThumbsUp, ThumbsDown, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
-import AdminForm from '../pages/Form'
+import AdminForm from './Form'
 import { Delete } from 'lucide-react';
 import Success from '../components/success';
 import Failure from '../components/failure';
