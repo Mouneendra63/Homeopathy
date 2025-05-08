@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit, Eye, X, CheckCircle, Users, Clipboard, ThumbsUp, ThumbsDown, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
-import Success from '../components/success'
-import Failure from '../components/failure';
 import AdminForm from '../pages/Form'
 import { Delete } from 'lucide-react';
+import Success from '../components/success';
+import Failure from '../components/failure';
 
-// Type definitions
 interface MonthlyData {
   name: string;
   patients: number;
@@ -60,6 +59,7 @@ function Temp(): JSX.Element {
     duration: ''
   });
   const [activeTab, setActiveTab] = useState<'all' | 'completed' | 'pending'>('all');
+   const [alertComponent, setAlertComponent] = useState<JSX.Element | null>(null);
   
  
   
@@ -73,7 +73,7 @@ function Temp(): JSX.Element {
   const fetchPatients = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('http://localhost:3000/api/userDetails');
+      const response = await axios.get('https://homeo-backend.onrender.com/api/userDetails');
       setPatients(response.data);
       setFilteredPatients(response.data);
       setIsLoading(false);
@@ -109,7 +109,7 @@ const getMonthName = (monthIndex: number) =>
   
       try {
         // Fetch data filtered by month and year
-        const response = await axios.get(`http://localhost:3000/api/userDetails`, {
+        const response = await axios.get(`https://homeo-backend.onrender.com/api/userDetails`, {
           params: {
             month: monthIndex + 1, // JS months are 0-based, backend may expect 1-based
             year
@@ -189,7 +189,7 @@ const getMonthName = (monthIndex: number) =>
   // Mark patient as completed
   const markAsComplete = async (id: string): Promise<void> => {
     try {
-      await axios.put(`http://localhost:3000/api/userDetail/${id}/complete`, { isCompleted: true });
+      await axios.put(`https://homeo-backend.onrender.com/api/userDetail/${id}/complete`, { isCompleted: true });
       const updatedPatients = patients.map(patient => 
         patient._id === id ? {...patient, isCompleted: true} : patient
       );
@@ -222,13 +222,13 @@ const getMonthName = (monthIndex: number) =>
       };
   
       // First, update the prescription
-      await axios.put(`http://localhost:3000/api/userDetails/${selectedPatient._id}`, {
+      await axios.put(`https://homeo-backend.onrender.com/api/userDetails/${selectedPatient._id}`, {
         newPrescription: [prescription]
       });
   
       // Then fetch the updated patient
       console.log(selectedPatient._id);
-      const res = await axios.get(`http://localhost:3000/api/userDetails/${selectedPatient._id}`);
+      const res = await axios.get(`https://homeo-backend.onrender.com/api/userDetails/${selectedPatient._id}`);
       window.location.reload();
       
       const updatedUser = res.data;
@@ -252,7 +252,7 @@ const getMonthName = (monthIndex: number) =>
 
   async function allReviews() {
     try {
-      const res = await axios.get('http://localhost:3000/api/reviews');
+      const res = await axios.get('https://homeo-backend.onrender.com/api/reviews');
       const reviews = res.data.data;
   
       const { good, bad } = reviews.reduce(
@@ -284,13 +284,60 @@ const getMonthName = (monthIndex: number) =>
   const getTotalPatients = () => patients.length;
   const getCompletedCheckups = () => patients.filter(p => p.isCompleted).length;
 
+
+  const handleDownload = async () => {
+    try {
+      const response = await axios.get('https://homeo-backend.onrender.com/api/download-excel', {
+        responseType: 'blob', 
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'userDetails.xlsx'); 
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Error downloading the file', error);
+    }
+  };
+
+  const sendEmail = async (id: string) => {
+    try {
+      const response= await axios.post(`https://homeo-backend.onrender.com/api/send-email/${id}`);
+      setSubmittedData(response.data);
+      if (response.status >= 200 && response.status < 300) {
+        setAlertComponent(<Success head={"Success"} message={"Your request submitted successfully"} />);
+        window.location.reload();
+      } else {
+        setAlertComponent(<Failure head={"Error"} message={"Your request failed"} />);
+        window.location.reload();
+      }
+
+      setTimeout(() => {
+        setAlertComponent(null);
+      }, 3000);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      setAlertComponent(<Failure head={"Error"} message={"Your request failed"} />);
+      setTimeout(() => {
+        setAlertComponent(null);
+      }, 3000);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Medical Admin Dashboard</h1>
-        </div>
+      <div className="flex max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 items-center justify-between">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Medical Admin Dashboard</h1>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition" 
+        onClick={handleDownload}>
+          Download
+        </button>
+      </div>
       </header>
 
       {/* Main Content */}
@@ -405,7 +452,7 @@ const getMonthName = (monthIndex: number) =>
                           <button 
                             onClick={async () => {
                               try {
-                                await axios.delete(`http://localhost:3000/api/userDetails/${patient._id}`);
+                                await axios.delete(`https://homeo-backend.onrender.com/api/userDetails/${patient._id}`);
                                 setPatients(patients.filter(p => p._id !== patient._id));
                                 setFilteredPatients(filteredPatients.filter(p => p._id !== patient._id));
                                 window.location.reload();
@@ -550,6 +597,12 @@ const getMonthName = (monthIndex: number) =>
                 >
                   Close
                 </button>
+                <button
+                onClick={()=> sendEmail(selectedPatient._id)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Send Email
+                </button>
               </div>
             </div>
           </div>
@@ -665,3 +718,7 @@ function StatsCard({ title, value, icon, bgColor }: StatsCardProps): JSX.Element
 }
 
 export default Temp;
+
+function setSubmittedData(data: any) {
+  throw new Error('Function not implemented.');
+}

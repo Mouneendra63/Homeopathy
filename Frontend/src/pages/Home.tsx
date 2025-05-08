@@ -40,7 +40,7 @@ function Home() {
     };
 
     try {
-      const response = await axios.post('http://localhost:3000/api/userDetails', formData);
+      const response = await axios.post('https://homeo-backend.onrender.com/api/userDetails', formData);
       console.log('Form submitted:', response);
 
       if (response.status >= 200 && response.status < 300) {

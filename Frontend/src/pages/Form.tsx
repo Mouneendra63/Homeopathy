@@ -40,13 +40,14 @@ function AdminForm() {
     };
 
     try {
-      const response = await axios.post('http://localhost:3000/api/userDetails', formData);
-      console.log('Form submitted:', response);
-
+      const response = await axios.post('https://homeo-backend.onrender.com/api/userDetails', formData);
+      setSubmittedData(response.data);
       if (response.status >= 200 && response.status < 300) {
         setAlertComponent(<Success head={"Success"} message={"Your request submitted successfully"} />);
+        window.location.reload();
       } else {
         setAlertComponent(<Failure head={"Error"} message={"Your request failed"} />);
+        window.location.reload();
       }
 
       // Clear form
