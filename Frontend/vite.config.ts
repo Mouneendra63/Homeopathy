@@ -9,6 +9,6 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build:{
-    outDir: 'build',
+    outDir: 'dist',
   }
 });
